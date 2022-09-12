@@ -1,19 +1,19 @@
 import pandas as pd
 from sklearn import tree
-from IPython.display import Image
+#from IPython.display import Image
 import numpy as np
-import pydotplus
+#import pydotplus
 import os
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-data2021 = pd.read_spss("C:/Users/godsu/OneDrive/바탕 화면/논문/kdca/kyrbs2021.sav")
+#from sklearn.model_selection import train_test_split
+#from sklearn.tree import DecisionTreeClassifier
+data2021 = pd.read_spss("C:/Users/godsu/OneDrive/바탕 화면/article/kdca/kyrbs2021.sav")
 #data2020 = pd.read_spss("C:/Users/godsu/OneDrive/바탕 화면/논문/kdca/kyrbs2020.sav")
 #data2019 = pd.read_spss("C:/Users/godsu/OneDrive/바탕 화면/논문/kdca/kyrbs2019.sav")
 #data2018 = pd.read_spss("C:/Users/godsu/OneDrive/바탕 화면/논문/kdca/kyrbs2018.sav")
 #data2017 = pd.read_spss("C:/Users/godsu/OneDrive/바탕 화면/논문/kdca/kyrbs2017.sav")
 
 """
-SEX 성별
+SEX 성별 1남자 2여자
 AGE 나이
 E_S_RCRD 학업성적
 E_SES 가정의 경제적 상태
@@ -37,14 +37,14 @@ M_SLP_HR 주중 잠든 시간
 M_SLP_MM 주중 잠든 분
 M_WK_HR 주중 일어난 시간
 M_WK_MM 주중 일어난 분
-M_SLP_HR_k 주말 잠든 시간
-M_SLP_MM_k 주말 잠든 분
-M_WK_HR_k 주말 일어난 시간
-M_WK_MM_k 주말 일어난 분
-M_SAD 최근 2주내 슬프거나 절망감
+M_SLP_HR_K 주말 잠든 시간
+M_SLP_MM_K 주말 잠든 분
+M_WK_HR_K 주말 일어난 시간
+M_WK_MM_K 주말 일어난 분
+M_SAD 최근 2주내 슬프거나 절망감    1없다 2있다
 M_SUI_CON 최근 12개월 내 자살생각
 M_SUI_PLN 구체적인 자살계획 짰나
-M_SUI_ATT 자살 시도
+M_SUI_ATT 자살 시도                1없다 2있다
 V_TRT 폭력당해서 병원에서 치료받은적
 AC_LT 지금까지 1잔이상 음주
 AC_FAGE 처음으로 1잔이상 마셔본 때
@@ -57,6 +57,8 @@ TC_DAGE 매일 피우기 시작 한 때
 TC_AMNT 하루 평균 흡연량
 TC_QT_YR 금연시도
 TC_SND_H 집안에서 담배냄새 맡은적 며칠
+M_STR 평상시스트레스 많이 느끼나요 1 대단히많이느낀다 2많이느낀다3조금느낀다4별로느끼지않는다5전혀느끼지않는다
+
 """
 col = [
     'SEX','AGE','E_S_RCRD','E_RES','E_SES','E_FM_F_1','E_FM_SF_2','E_FM_M_3','E_FM_SM_4',
@@ -65,35 +67,33 @@ col = [
     'M_SLP_EN','M_SLP_HR','M_SLP_MM','M_WK_HR','M_WK_MM','M_SLP_HR_K','M_SLP_MM_K','M_WK_HR_K','M_WK_MM_K',
     'M_SAD', 'M_SUI_CON', 'M_SUI_PLN', 'M_SUI_ATT', 'V_TRT',
     'AC_LT','AC_FAGE','AC_DAYS','AC_AMNT',
-    'TC_LT','TC_DAYS','TC_FAGE','TC_DAGE','TC_AMNT','TC_QT_YR','TC_SND_H'
+    'TC_LT','TC_DAYS','TC_FAGE','TC_DAGE','TC_AMNT','TC_QT_YR','TC_SND_H',
+    'M_STR'
 ] 
+#0 no, 1 yes
+data2021.rename(columns={'SEX':'성별'},inplace=True)
+data2021 = data2021.replace({'성별' : 1}, 0) #남
+data2021 = data2021.replace({'성별' : 2}, 1) #여
+data2021.rename(columns={'AGE':'나이'},inplace=True)
+data2021.rename(columns={'TC_LT':'흡연경험'},inplace=True)
+data2021 = data2021.replace({'흡연경험' : 1}, 0)#no
+data2021 = data2021.replace({'흡연경험' : 2}, 1)#yes
+data2021.rename(columns={'AC_LT':'음주경험'},inplace=True)
+data2021 = data2021.replace({'음주경험' : 1}, 0)#no
+data2021 = data2021.replace({'음주경험' : 2}, 1)#yes
+data2021.rename(columns={'M_STR':'평상시스트레스정도'},inplace=True)
+data2021 = data2021.replace({'평상시스트레스정도' : 5}, 0)#no
+data2021 = data2021.replace({'평상시스트레스정도' : 4}, 1)#yes
+data2021 = data2021.replace({'평상시스트레스정도' : 3}, 2)#yes
+data2021 = data2021.replace({'평상시스트레스정도' : 2}, 3)#yes
+data2021 = data2021.replace({'평상시스트레스정도' : 1}, 4)#yes
 
-print(data2021['TC_LT'])
 
-x = np.array(pd.DataFrame(data2021, columns=['SEX']))
-y = np.array(pd.DataFrame(data2021, columns=['TC_LT']))
-X_train, X_test, y_train, y_test = train_test_split(x,y)
+dataset = data2021[['성별','나이','흡연경험','음주경험','평상시스트레스정도']]
+#data2021.rename(columns={'AGE':'나이'},inplace=True)
+#dataset = data2021[['성별','M_SLP_EN','M_SAD','M_SUI_ATT','TC_LT']]
 
-dt_clf = DecisionTreeClassifier()
-dt_clf = dt_clf.fit(X_train, y_train)
-dt_prediction = dt_clf.predict(X_test)
-
-
-os.environ["PATH"] += os.pathsep + 'C:/Users/godsu/OneDrive/바탕 화면/논문/Graphviz/bin/'
-feature_names = ['SEX']#data2021.columns.tolist()
-feature_names = feature_names[0:1]
-
-
-
-target_name = np.array(['Play No', 'Play Yes'])
-dt_dot_data = tree.export_graphviz(dt_clf, out_file = None,
-                                  feature_names = feature_names,
-                                  class_names = target_name,
-                                  filled = True, rounded = True,
-                                  special_characters = True)
-
-dt_graph = pydotplus.graph_from_dot_data(dt_dot_data)
-Image(dt_graph.create_png())
+print(dataset)
 
 #print(data2020[col])
 #print(data2019[col])
